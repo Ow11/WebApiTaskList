@@ -1,6 +1,7 @@
 using NMTask.Models;
 using System.Collections.Generic;
 using System.Linq;
+using NMList.Services;
 
 namespace NMTask.Services
 {
@@ -42,8 +43,10 @@ namespace NMTask.Services
 
         public static Task Get(int id) => Tasks.FirstOrDefault(t => t.Id == id);
 
-        public static Task Add(Task task)
+        public static Task Add(int listId, Task task)
         {
+            if (! ListService.AddTask(listId, nextId))
+                return null;
             task.Id = nextId++;
             Tasks.Add(task);
             return task;

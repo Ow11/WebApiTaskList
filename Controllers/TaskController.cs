@@ -33,10 +33,14 @@ namespace NMTask.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Task task)
+        public IActionResult Create([FromQuery] int listId, Task task)
         {
-            TaskService.Add(task);
-            return CreatedAtAction(nameof(Create), new { id = task.Id }, task);
+            Task response = TaskService.Add(listId, task);
+            
+            if (response is null)
+                return BadRequest();
+
+            return CreatedAtAction(nameof(Create), new { id = task.Id }, response);
         }
 
         [HttpPut("{id}")]

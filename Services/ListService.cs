@@ -95,5 +95,15 @@ namespace NMList.Services
 
             return Lists[index];
         }
+
+        public static bool AddTask(int listId, int taskId)
+        {
+            int index = Lists.FindIndex(t => t.Id == listId);
+            if (index == -1)
+                return false;
+            
+            Lists[index].Tasks.Add(taskId);
+            return true;
+        }
     }
 }
