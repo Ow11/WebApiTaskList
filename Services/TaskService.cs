@@ -30,7 +30,15 @@ namespace NMTask.Services
             };
         }
 
-        public static List<Task> GetAll() => Tasks;
+        public static List<Task> GetAll(int offset, int count)
+        {
+            List<Task> result = new List<Task>();
+            
+            foreach(Task task in Tasks.Skip(offset).Take(count))
+                result.Add(task);
+
+            return result;
+        }
 
         public static Task Get(int id) => Tasks.FirstOrDefault(t => t.Id == id);
 

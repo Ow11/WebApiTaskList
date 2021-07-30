@@ -16,8 +16,10 @@ namespace NMTask.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Task>> GetAll() =>
-            TaskService.GetAll();
+        public ActionResult<List<Task>> GetAll(
+            [FromQuery] int offset = 0,
+            [FromQuery] int count = 100
+        ) => TaskService.GetAll(offset, count);
 
         [HttpGet("{id}")]
         public ActionResult<Task> Get(int id)

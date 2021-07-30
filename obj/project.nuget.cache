@@ -1,11 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "CSmWyflzq7cuKksps8Ozuaidf0kjeAgIO0WHdH0nFYzn4X+KYpsHps1gXpzep6xJRWAcChk5BCVeb3Y4AxnynQ==",
+  "dgSpecHash": "fWV1vT1UJAHCTqSHHftieSak6h0cmxmM4+mZTOiJdpvFf8CpNJ0Hfbr8rqiFIp4JN8KkmBUe007UQ9VI932rqA==",
   "success": true,
   "projectFilePath": "/home/ow11/Projs/Prog2SemProj_2021/asp_rest/asp_rest.csproj",
   "expectedPackageFiles": [
+    "/home/ow11/.nuget/packages/microsoft.extensions.apidescription.client/0.3.0-preview7.19365.7/microsoft.extensions.apidescription.client.0.3.0-preview7.19365.7.nupkg.sha512",
     "/home/ow11/.nuget/packages/microsoft.extensions.apidescription.server/3.0.0/microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
     "/home/ow11/.nuget/packages/microsoft.openapi/1.2.3/microsoft.openapi.1.2.3.nupkg.sha512",
+    "/home/ow11/.nuget/packages/newtonsoft.json/12.0.2/newtonsoft.json.12.0.2.nupkg.sha512",
+    "/home/ow11/.nuget/packages/nswag.apidescription.client/13.0.5/nswag.apidescription.client.13.0.5.nupkg.sha512",
+    "/home/ow11/.nuget/packages/nswag.msbuild/13.0.5/nswag.msbuild.13.0.5.nupkg.sha512",
     "/home/ow11/.nuget/packages/swashbuckle.aspnetcore/5.6.3/swashbuckle.aspnetcore.5.6.3.nupkg.sha512",
     "/home/ow11/.nuget/packages/swashbuckle.aspnetcore.swagger/5.6.3/swashbuckle.aspnetcore.swagger.5.6.3.nupkg.sha512",
     "/home/ow11/.nuget/packages/swashbuckle.aspnetcore.swaggergen/5.6.3/swashbuckle.aspnetcore.swaggergen.5.6.3.nupkg.sha512",
