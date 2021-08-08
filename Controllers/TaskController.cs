@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using NMTask.Models;
 using NMTask.Services;
+using asp_rest.Data;
 
 namespace NMTask.Controllers
 {
@@ -10,9 +11,10 @@ namespace NMTask.Controllers
     [Route("[controller]")]
     public class TaskController : ControllerBase
     {
-        public TaskController()
+        private readonly LocalDbContext _context;
+        public TaskController(LocalDbContext context)
         {
-
+            _context = context;
         }
 
         [HttpGet]
