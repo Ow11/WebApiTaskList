@@ -1,0 +1,362 @@
+openapi: 3.0.1
+info:
+  title: WebApiTaskList
+  version: v1
+paths:
+  /api/List:
+    get:
+      tags:
+        - List
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: count
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 20
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListDisplayInAll'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListDisplayInAll'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListDisplayInAll'
+    post:
+      tags:
+        - List
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/ListMinified'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListMinified'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ListMinified'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ListMinified'
+      responses:
+        '200':
+          description: Success
+  /api/List/{id}:
+    get:
+      tags:
+        - List
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ListModel'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListModel'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ListModel'
+    put:
+      tags:
+        - List
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/ListModel'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListModel'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ListModel'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ListModel'
+      responses:
+        '200':
+          description: Success
+    delete:
+      tags:
+        - List
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Success
+  /api/List/{id}/merge/{mergeId}:
+    put:
+      tags:
+        - List
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: mergeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Success
+  /api/Task:
+    get:
+      tags:
+        - Task
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: count
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskModel'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskModel'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskModel'
+  /api/Task/{id}:
+    get:
+      tags:
+        - Task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/TaskModel'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskModel'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/TaskModel'
+    put:
+      tags:
+        - Task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/TaskModel'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskModel'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/TaskModel'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/TaskModel'
+      responses:
+        '200':
+          description: Success
+    delete:
+      tags:
+        - Task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Success
+  /api/Task/List/{listId}:
+    post:
+      tags:
+        - Task
+      parameters:
+        - name: listId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/TaskMinified'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskMinified'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/TaskMinified'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/TaskMinified'
+      responses:
+        '200':
+          description: Success
+components:
+  schemas:
+    ListDisplayInAll:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          nullable: true
+        tasks:
+          type: integer
+          format: int32
+      additionalProperties: false
+    ListMinified:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+      additionalProperties: false
+    TaskModel:
+      required:
+        - taskModelId
+      type: object
+      properties:
+        taskModelId:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          nullable: true
+        listModelId:
+          type: integer
+          format: int32
+        listModel:
+          $ref: '#/components/schemas/ListModel'
+      additionalProperties: false
+    ListModel:
+      required:
+        - listModelId
+      type: object
+      properties:
+        listModelId:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          nullable: true
+        taskModels:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskModel'
+          nullable: true
+      additionalProperties: false
+    TaskMinified:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+      additionalProperties: false
