@@ -62,5 +62,5 @@ but it can be changed to any other SQL server of choice. See more [here](https:/
 
 ## Some misc:
 
-**IIS Express** and **DB Browser for sqlite** is useful tools for debugging on Windows.
+**IIS Express** and **DB Browser for sqlite** are useful tools for debugging on Windows.
 Unfortunately, I haven't found any analogue for linux :(
