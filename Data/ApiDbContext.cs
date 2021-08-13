@@ -18,11 +18,6 @@ namespace WebApiTaskList.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ListModel>().HasMany(m => m.TaskModels).WithOne(n => n.ListModel).OnDelete(DeleteBehavior.Cascade).IsRequired();
-            // modelBuilder.Entity<TaskModel>().HasOne(m => m.ListModel).WithMany(n => n.TaskModels).HasForeignKey(k => k.ListModelId);
-
-            // modelBuilder.Entity<ListModel>().HasMany(m => m.TaskModels).WithOne();
-            // modelBuilder.Entity<ListModel>().Navigation(m => m.TaskModels).UsePropertyAccessMode(PropertyAccessMode.Property);
-            // modelBuilder.Entity<TaskModel>().HasOne(m => m.ListModel).WithMany(n => n.TaskModels).HasForeignKey(k => k.ListModelId);
         }
 
         public DbSet<TaskModel> Tasks { get; set; }

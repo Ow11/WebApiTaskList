@@ -53,8 +53,6 @@ namespace WebApiTaskList.Services
             _taskRepository.InsertTask(task);
             _taskRepository.SaveTask();
 
-            // if (list.TaskModels is null)
-            //     list.TaskModels = new List<TaskModel>();
             list.TaskModels.Add(task);
             _listRepository.SaveList();
 

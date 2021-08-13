@@ -18,10 +18,7 @@ namespace WebApiTaskList.Models
         public string Description { get; set; }
         public string UpdatedAt { get; set; }
         
-        // [InverseProperty("ListModel")]
         public ICollection<TaskModel> TaskModels { get; set; }
-
-
         public ListModel()
         {
             TaskModels = new List<TaskModel>();
