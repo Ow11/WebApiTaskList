@@ -1,25 +1,66 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NMList.Models;
-using NMList.Services;
+using Microsoft.EntityFrameworkCore;
+using WebApiTaskList.Data;
+using WebApiTaskList.Models;
+using WebApiTaskList.Services;
 
-namespace NMList.Controllers
+namespace WebApiTaskList.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
     public class ListController : ControllerBase
     {
-        public ListController() { }
+        private readonly IListService _listService;
+        private readonly ITaskService _taskService;
+
+        public ListController(IListService listService, ITaskService taskService)
+        {
+            _listService = listService;
+            _taskService = taskService;
+        }
 
         [HttpGet]
-        public ActionResult<List<LisT>> GetAll() =>
-            ListService.GetAll();
+        public ActionResult<List<ListDisplayInAll>> GetAll(
+            [FromQuery] int offset = 0,
+            [FromQuery] int count = 20
+        )
+        {
+            List<ListDisplayInAll> result  = new List<ListDisplayInAll>();
+
+            foreach(var list in _listService.GetAll(offset, count))
+            {
+                var listDisplayInAll = new ListDisplayInAll
+                {
+                    Id = list.ListModelId,
+                    Name = list.Name,
+                    Description = list.Description,
+                    UpdatedAt = list.UpdatedAt,
+                };
+
+                int tasks = 0;
+
+                if (!(list.TaskModels is null))
+                    tasks = list.TaskModels.Count;
+
+                listDisplayInAll.Tasks = tasks;
+
+                result.Add(
+                    listDisplayInAll
+                );
+            }
+
+            return result;
+        }
 
         [HttpGet("{id}")]
-        public ActionResult<ListDetailed> Get(int id)
+        public ActionResult<ListModel> Get(int id)
         {
-            ListDetailed list = ListService.Get(id);
+            var list = _listService.Get(id);
 
             if (list is null)
                 return NotFound();
@@ -28,23 +69,29 @@ namespace NMList.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(LisT list)
+        public IActionResult Create(ListMinified list)
         {
-            ListService.Add(list);
-            return CreatedAtAction(nameof(Create), new { id = list.Id }, list);
+            ListModel result = new ListModel
+            {
+                Name = list.Name,
+                Description = list.Description,
+            };
+
+            _listService.Add(result);
+            return CreatedAtAction(nameof(Create), new { id = result.ListModelId }, result);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, LisT list)
+        public IActionResult Update(int id, ListModel list)
         {
-            if (id != list.Id)
+            if (id != list.ListModelId)
                 return BadRequest();
 
-            LisT existingList = ListService.GetLisT(id);
+            ListModel existingList = _listService.Get(id);
             if (existingList is null)
                 return NotFound();
 
-            ListService.Update(list);
+            _listService.Update(list);
 
             return CreatedAtAction(nameof(Update), list);
         }
@@ -52,12 +99,12 @@ namespace NMList.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            LisT list = ListService.GetLisT(id);
+            ListModel list = _listService.Get(id);
 
             if (list is null)
                 return NotFound();
 
-            ListService.Delete(id);
+            _listService.Delete(id);
 
             return NoContent();
         }
@@ -68,13 +115,13 @@ namespace NMList.Controllers
             if (id == mergeId)
                 return BadRequest();
 
-            if (ListService.GetLisT(id) is null || ListService.GetLisT(mergeId) is null)
+            if (_listService.Get(id) is null || _listService.Get(mergeId) is null)
                 return NotFound();
 
-            LisT list = ListService.Merge(id, mergeId);
+            ListModel list = _listService.Merge(id, mergeId);
 
             return Ok(list);
-            // return CreatedAtAction(nameof(Update), list);
         }
+
     }
 }

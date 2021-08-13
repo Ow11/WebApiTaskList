@@ -1,32 +1,37 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NMTask.Models;
-using NMTask.Services;
-using asp_rest.Data;
+using Microsoft.EntityFrameworkCore;
+using WebApiTaskList.Data;
+using WebApiTaskList.Models;
+using WebApiTaskList.Services;
 
-namespace NMTask.Controllers
+namespace WebApiTaskList.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
     public class TaskController : ControllerBase
     {
-        private readonly LocalDbContext _context;
-        public TaskController(LocalDbContext context)
+        private readonly ITaskService _taskService;
+
+        public TaskController(ITaskService taskService)
         {
-            _context = context;
+            _taskService = taskService;
         }
 
         [HttpGet]
-        public ActionResult<List<Task>> GetAll(
+        public ActionResult<List<TaskModel>> GetAll(
             [FromQuery] int offset = 0,
             [FromQuery] int count = 100
-        ) => TaskService.GetAll(offset, count);
+        ) => _taskService.GetAll(offset, count);
 
         [HttpGet("{id}")]
-        public ActionResult<Task> Get(int id)
+        public ActionResult<TaskModel> Get(int id)
         {
-            Task task = TaskService.Get(id);
+            TaskModel task = _taskService.Get(id);
 
             if (task is null)
                 return NotFound();
@@ -34,28 +39,35 @@ namespace NMTask.Controllers
             return task;
         }
 
-        [HttpPost]
-        public IActionResult Create([FromQuery] int listId, Task task)
+        [HttpPost("List/{listId}")]
+        public IActionResult Create(int listId, TaskMinified taskMini)
         {
-            Task response = TaskService.Add(listId, task);
-            
+            if (taskMini.Name == "")
+                return BadRequest();
+
+            TaskModel task = new()
+            {
+                Name = taskMini.Name,
+                Description = taskMini.Description
+            };
+
+            TaskModel response = _taskService.Add(listId, task);
+
             if (response is null)
                 return BadRequest();
 
-            return CreatedAtAction(nameof(Create), new { id = task.Id }, response);
+            return CreatedAtAction(nameof(Create), new { id = task.TaskModelId }, response);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Task task)
+        public IActionResult Update(int id, TaskModel task)
         {
-            if (id != task.Id)
+            if (id != task.TaskModelId)
                 return BadRequest();
 
-            Task existingTask = TaskService.Get(id);
+            TaskModel existingTask = _taskService.Update(task);
             if (existingTask is null)
                 return NotFound();
-
-            TaskService.Update(task);
 
             return CreatedAtAction(nameof(Update), task);
         }
@@ -63,12 +75,12 @@ namespace NMTask.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            Task task = TaskService.Get(id);
+            TaskModel task = _taskService.Get(id);
 
             if (task is null)
                 return NotFound();
 
-            TaskService.Delete(id);
+            _taskService.Delete(id);
 
             return NoContent();
         }

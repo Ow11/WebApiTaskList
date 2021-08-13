@@ -1,75 +1,87 @@
-using NMTask.Models;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NMList.Services;
+using System.Threading.Tasks;
+using WebApiTaskList.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebApiTaskList.Data;
+using WebApiTaskList.Repositories;
+using WebApiTaskList.Services;
 
-namespace NMTask.Services
+namespace WebApiTaskList.Services
 {
-    public static class TaskService
+    public interface ITaskService
     {
-        // TODO: add createdAt time
-        static List<Task> Tasks { get; }
-        static int nextId = 3;
-        static TaskService()
+        public List<TaskModel> GetAll(int offset, int count);
+        public TaskModel Get(int id);
+        public TaskModel Add(int listId, TaskModel task);
+        public TaskModel Delete(int id);
+        public TaskModel Update(TaskModel task);
+    }
+
+    public class TaskService : ITaskService
+    {
+        private readonly ITaskRepository _taskRepository;
+        private readonly IListRepository _listRepository;
+        public TaskService(ITaskRepository taskRepository, IListRepository listRepository)
         {
-            Tasks = new List<Task>
-            {
-                new Task
-                {
-                    Id = 1,
-                    Name = "The Godfather",
-                    Description = "Watch this great movie again with my friend!",
-                    CreatedAt = "2021-07-29T21:18:59.447Z"
-                },
-                new Task
-                {
-                    Id = 2,
-                    Name = "12 Angry Men",
-                    Description = "A reccomendation from my friend",
-                    CreatedAt = "2021-07-29T21:18:59.447Z"
-                },
-            };
+            _taskRepository = taskRepository;
+            _listRepository = listRepository;
         }
 
-        public static List<Task> GetAll(int offset, int count)
+        public List<TaskModel> GetAll(int offset, int count)
         {
-            List<Task> result = new List<Task>();
-            
-            foreach(Task task in Tasks.Skip(offset).Take(count))
-                result.Add(task);
-
+            var result = (List<TaskModel>)_taskRepository.GetTasks(offset, count);
             return result;
         }
 
-        public static Task Get(int id) => Tasks.FirstOrDefault(t => t.Id == id);
+        public TaskModel Get(int id) => _taskRepository.GetTaskByID(id);
 
-        public static Task Add(int listId, Task task)
+        public TaskModel Add(int listId, TaskModel task)
         {
-            if (! ListService.AddTask(listId, nextId))
+            var list = _listRepository.GetListByID(listId);
+
+            if (list is null)
                 return null;
-            task.Id = nextId++;
-            Tasks.Add(task);
+            
+            task.ListModelId = listId;
+            task.ListModel = list;
+
+            task.CreatedAt = Utils.DateTimeNow();
+
+            _taskRepository.InsertTask(task);
+            _taskRepository.SaveTask();
+
+            // if (list.TaskModels is null)
+            //     list.TaskModels = new List<TaskModel>();
+            list.TaskModels.Add(task);
+            _listRepository.SaveList();
+
             return task;
         }
 
-        public static Task Delete(int id)
+        public TaskModel Delete(int id)
         {
-            Task task = Get(id);
+            TaskModel task = Get(id);
             if (task is null)
                 return null;
 
-            Tasks.Remove(task);
+            _taskRepository.DeleteTask(task);
+            _taskRepository.SaveTask();
             return task;
         }
 
-        public static Task Update(Task task)
+        public TaskModel Update(TaskModel task)
         {
-            int index = Tasks.FindIndex(t => t.Id == task.Id);
-            if (index == -1)
-                return null;
+            TaskModel existingTask = _taskRepository.GetTaskByID(task.TaskModelId);
 
-            Tasks[index] = task;
+            existingTask.Name = task.Name;
+            existingTask.Description = task.Description;
+
+            _taskRepository.SaveTask();
             return task;
         }
+
     }
 }

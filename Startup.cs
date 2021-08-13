@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -10,41 +6,50 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Microsoft.EntityFrameworkCore.Sqlite;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using WebApiTaskList.Data;
 using Microsoft.EntityFrameworkCore;
+using WebApiTaskList.Repositories;
+using WebApiTaskList.Services;
+using Newtonsoft.Json;
 
-namespace asp_rest
+namespace WebApiTaskList
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            Environment = env;
             Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
-        public IWebHostEnvironment Environment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApiDbContext>(options =>
+                options.UseSqlite(Configuration.GetConnectionString("cs"))
+            );
+
+            services.AddScoped<ITaskRepository, TaskRepository>();
+            services.AddScoped<IListRepository, ListRepository>();
+            services.AddScoped<ITaskService, TaskService>();
+            services.AddScoped<IListService, ListService>();
+
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
+
+            services.AddHttpContextAccessor();
 
             services.AddControllers();
-
-            services.AddDbContext<DbContext>(options =>
-            {
-                var connectionString = Configuration.GetConnectionString("DbContext");
-
-                options.UseSqlite(connectionString);
-            });
-
-            services.AddDbContext<DbContext>(options =>
-            options.UseSqlite(Configuration.GetConnectionString("DbContext")));
-
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "asp_rest", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiTaskList", Version = "v1" });
             });
         }
 
@@ -55,7 +60,7 @@ namespace asp_rest
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "asp_rest v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApiTaskList v1"));
             }
 
             app.UseRouting();

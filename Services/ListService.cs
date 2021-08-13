@@ -1,109 +1,88 @@
-using NMList.Models;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NMTask.Services;
-// using NMTask.Models;
+using System.Threading.Tasks;
+using WebApiTaskList.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebApiTaskList.Data;
+using WebApiTaskList.Repositories;
+using WebApiTaskList.Services;
 
-namespace NMList.Services
+namespace WebApiTaskList.Services
 {
-    public static class ListService
+    public interface IListService
     {
-        // TODO: Add DateTime
-        static List<LisT> Lists { get; }
-        static int nextId = 2;
-        static ListService()
+        public List<ListModel> GetAll(int offset, int count);
+        public ListModel Get(int id);
+        public ListModel Add(ListModel list);
+        public ListModel Delete(int id);
+        public ListModel Update(ListModel list);
+        public ListModel Merge(int id, int mergeId);
+    }
+
+    public class ListService : IListService
+    {
+        private readonly IListRepository _listRepository;
+        private readonly ITaskRepository _taskRepository;
+        public ListService(IListRepository listRepository, ITaskRepository taskRepository)
         {
-            Lists = new List<LisT>
-            {
-                new LisT
-                {
-                    Id = 1,
-                    Name = "Movies",
-                    Description = "Movies to watch",
-                    UpdatedAt = null,
-                    Tasks = new List<int>
-                    {
-                        1, 2
-                    }
-                }
-            };
+            _listRepository = listRepository;
+            _taskRepository = taskRepository;
         }
 
-        public static List<LisT> GetAll() => Lists;
-
-        public static LisT GetLisT(int id) => Lists.FirstOrDefault(t => t.Id == id);
-
-        public static ListDetailed Get(int id)
+        public List<ListModel> GetAll(int offset, int count)
         {
-            LisT list = Lists.FirstOrDefault(t => t.Id == id);
-
-            if (list is null)
-                return null;
-
-            ListDetailed result = new ListDetailed
-            {
-                Id = list.Id,
-                Name = list.Name,
-                Description = list.Description,
-                UpdatedAt = list.UpdatedAt,
-            };
-            result.Tasks = list.Tasks.ConvertAll(x => TaskService.Get(x));
+            var result = (List<ListModel>)_listRepository.GetLists(offset, count);
             return result;
         }
 
-        public static LisT Add(LisT list)
+        public ListModel Get(int id) => _listRepository.GetListByID(id);
+
+        public ListModel Add(ListModel list)
         {
-            list.Id = nextId++;
-            Lists.Add(list);
+            list.UpdatedAt = Utils.DateTimeNow();
+            list.TaskModels = new List<TaskModel>();
+            _listRepository.InsertList(list);
+            _listRepository.SaveList();
             return list;
         }
 
-        public static LisT Delete(int id)
+        public ListModel Delete(int id)
         {
-            LisT list = GetLisT(id);
+            ListModel list = Get(id);
             if (list is null)
                 return null;
 
-            foreach (int taskId in list.Tasks)
-                TaskService.Delete(taskId);
-
-            Lists.Remove(list);
+            _listRepository.DeleteList(list);
+            _listRepository.SaveList();
             return list;
         }
 
-        public static LisT Update(LisT list)
+        public ListModel Update(ListModel list)
         {
-            int index = Lists.FindIndex(t => t.Id == list.Id);
-            if (index == -1)
-                return null;
+            ListModel existingList = _listRepository.GetListByID(list.ListModelId);
 
-            Lists[index] = list;
+            existingList.Name = list.Name;
+            existingList.Description = list.Description;
+            existingList.UpdatedAt = Utils.DateTimeNow();
+            existingList.TaskModels = list.TaskModels;
+
+            _listRepository.SaveList();
             return list;
         }
 
-        public static LisT Merge(int id, int mergeId)
+        public ListModel Merge(int id, int mergeId)
         {
-            int index = Lists.FindIndex(t => t.Id == id);
-            LisT merge = GetLisT(mergeId);
-            if (index == -1 || merge is null)
-                return null;
+            ListModel list = _listRepository.GetListByID(id);
+            ListModel listToMerge = _listRepository.GetListByID(mergeId);
 
-            foreach(int task in merge.Tasks)
-                Lists[index].Tasks.Add(task);
+            foreach (var task in listToMerge.TaskModels)
+                list.TaskModels.Add(task);
 
-            Delete(mergeId);
-
-            return Lists[index];
-        }
-
-        public static bool AddTask(int listId, int taskId)
-        {
-            int index = Lists.FindIndex(t => t.Id == listId);
-            if (index == -1)
-                return false;
-            
-            Lists[index].Tasks.Add(taskId);
-            return true;
+            _listRepository.DeleteList(listToMerge);
+            _listRepository.SaveList();
+            return list;
         }
     }
 }
