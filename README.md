@@ -12,8 +12,8 @@ With installed globally dotnet core call `dotnet run` from the project directory
 
 ## How to make migrations and apply them?
 
-Call `dotnet ef migrations add [name of migration]` from the project directory to create,
-and `dotnet ef databse update`
+Call `dotnet ef migrations add [name of migration]` from the project directory to create
+and `dotnet ef databse update` to update the database.
 
 ## How to examinate it works?
 
